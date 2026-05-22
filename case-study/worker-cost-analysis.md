@@ -1,389 +1,353 @@
-# Worker Cost Analysis (RQ / Background Processing)
+# Worker Cost & Architecture Analysis (RQ Pipeline)
 
-This document analyzes the cost structure, architectural role, and optimization opportunities of the DocCore background worker system, currently implemented using Redis Queue (RQ) and an always-on worker process.
+This document describes the architecture and operational role of the DocCore background worker system using Redis Queue (RQ) and an always-on worker process.
+
+It focuses on how ingestion is processed, how the pipeline is structured, and the architectural implications of the current execution model.
 
 ---
 
 # Overview
 
-DocCore uses a background worker system to handle compute-heavy and latency-sensitive tasks such as:
+DocCore uses a background worker system to process document ingestion asynchronously.
 
-- Document extraction
-- Semantic blocking
-- Embedding generation
-- Vector indexing (pgvector)
-- Long-running ingestion pipelines
-- Retryable processing workflows
+The worker is responsible for transforming uploaded documents into structured representations used later by the RAG system.
 
-The worker is a critical part of the RAG pipeline, responsible for transforming raw uploads into searchable semantic knowledge.
+Main responsibilities include:
+
+- document ingestion execution
+- text extraction
+- document blocking
+- embedding generation
+- vector persistence (pgvector)
+- pipeline state updates
+
+The worker is focused entirely on ingestion and indexing, not query-time retrieval.
 
 ---
 
-# Current Architecture
+# Architecture
 
 ```text
 FastAPI API
     ↓
 Redis Queue (RQ)
     ↓
-Background Worker (always-on process)
+Worker Process (RQ consumer)
     ↓
 PostgreSQL + pgvector
 ```
 
 ---
 
-# Worker Responsibilities
+# Worker Role in the System
 
-The worker handles all asynchronous document lifecycle processing:
+The worker is the execution layer of the ingestion pipeline.
+
+It is triggered whenever a document is uploaded and enqueued by the API layer.
+
+Flow:
+
+```text
+Upload → API → Queue → Worker → Processing Pipeline → Storage
+```
+
+---
+
+# Ingestion Pipeline (Code-Based)
+
+The worker executes the pipeline defined in:
+
+- `process_ingestion_pipeline.py`
+- `run_document_ingestion_job.py`
+
+---
 
 ## 1. Document Ingestion
 
-- File retrieval
-- Validation continuation
-- Extraction pipeline execution
+Upload requests are converted into background jobs.
+
+The worker consumes these jobs asynchronously.
 
 ---
 
 ## 2. Text Extraction
 
-- PDF / text parsing
-- Content normalization
-- Structural cleanup
+Documents are parsed into raw text depending on format and structure.
 
 ---
 
-## 3. Semantic Blocking
+## 3. Document Blocking
 
-- Splitting documents into semantic units
-- Preserving contextual coherence
-- Preparing data for embedding generation
+The system applies a blocking strategy defined in `blocking.py`.
+
+Important clarification:
+
+DocCore no longer uses naive chunking as the primary abstraction; it uses document blocks, with chunking as an internal fallback/splitting strategy.
+
+Blocks are created using:
+
+- structural signals
+- size constraints
+- overlap windows
+- layout heuristics
+
+The goal is to produce stable units for embedding and retrieval.
 
 ---
 
 ## 4. Embedding Generation
 
-- Calling embedding model
-- Transforming text into vectors
-- Preparing data for vector storage
+Each block is transformed into a vector embedding using an external embedding provider.
+
+This step is asynchronous and rate-limited depending on provider constraints.
 
 ---
 
 ## 5. Vector Storage
 
-- Writing embeddings to PostgreSQL (pgvector)
-- Associating vectors with tenant + document metadata
+Embeddings are persisted in PostgreSQL using pgvector.
+
+Each entry includes:
+
+- tenant_id
+- document_id
+- block_id
+- embedding vector
+
+This enables tenant-scoped semantic retrieval later.
 
 ---
 
-## 6. Pipeline Orchestration
+## 6. Pipeline State Updates
 
-- Managing retries
-- Handling failures
-- Maintaining ingestion state
-- Updating processing status
+The worker updates document processing state during execution:
+
+- processing
+- completed
+- failed
+
+This allows the API to expose ingestion status.
 
 ---
 
-# Cost Structure
+# Role in RAG System
 
-The worker runs as an always-on service in the infrastructure (Render background worker model).
+The worker does NOT participate in query-time retrieval.
+
+Its role is strictly building the index used by the RAG system.
+
+At runtime:
+
+```text
+User Query → API → Vector Search → Context → LLM
+```
+
+At ingestion:
+
+```text
+Upload → Worker → Embeddings → Vector DB
+```
+
+---
+
+# Execution Model
+
+The worker runs as a long-lived RQ consumer process.
+
+```text
+start-worker.sh → listens to queue → processes jobs → idle wait
+```
+
+This means:
+
+- the worker is always running
+- it continuously polls or waits for jobs
+- execution is not event-scaled
+
+---
+
+# Cost Model (Architectural View)
+
+This section describes structural cost behavior, not measured billing data.
+
+---
+
+## Always-On Model
+
+The worker runs continuously regardless of workload.
+
+This implies:
+
+- compute is allocated 24/7
+- idle time still counts as runtime
+- cost is not directly proportional to job volume
+
+---
 
 ## Cost Characteristics
 
-- Billing is based on uptime (not usage)
-- Worker runs continuously (24/7)
-- Cost is independent of workload intensity
-
----
-
-## Observed Cost Behavior
-
-Even under low usage:
-
-- Worker remains active
-- Billing continues at constant rate
-- Idle time is still billed as full compute time
-
-This creates a mismatch between:
-
-- Actual processing demand
-- Infrastructure billing model
-
----
-
-# Cost Breakdown Logic
-
-The worker cost is primarily driven by:
-
 | Factor | Impact |
 |------|--------|
-| Uptime (24/7 execution) | High |
-| Queue activity | Low impact |
-| CPU usage spikes | Medium |
-| Idle waiting time | Still billed |
-| Job frequency | Indirect |
+| uptime | high |
+| idle time | high |
+| ingestion volume | medium |
+| embedding workload | variable |
+| queue activity | low impact |
 
 ---
 
-# Key Insight
+## Key Insight
 
-The most important cost driver is NOT workload.
+The main cost driver is:
 
-It is:
-
-> Always-on runtime model
-
-Even when the queue is empty, the worker is still billed as running infrastructure.
+> the always-on execution model, not the actual workload
 
 ---
 
-# Why This Matters
+# Trade-offs
 
-In early-stage SaaS systems like DocCore:
-
-- Workload is intermittent
-- Ingestion is burst-based
-- Retrieval is API-driven
-- Long idle periods are common
-
-This leads to:
-
-> High idle cost relative to actual compute usage
+The current architecture prioritizes simplicity over elasticity.
 
 ---
 
-# Architectural Trade-Off
+## Advantages
 
-The worker model introduces a classic trade-off:
-
-## Pros
-
-- Simple architecture
-- Reliable processing
-- Easy debugging
-- Immediate job execution
-- Strong control over pipeline state
+- simple pipeline architecture
+- predictable execution model
+- easy debugging
+- stable ingestion flow
+- clear separation between API and worker
 
 ---
 
-## Cons
+## Limitations
 
-- Always-on cost
-- Inefficient idle usage
-- No automatic scale-to-zero
-- Limited elasticity
-- Fixed baseline billing
+- always-on compute cost
+- no scale-to-zero behavior
+- limited elasticity
+- idle resource usage
+- manual scaling only
 
 ---
 
-# Why RQ Was Chosen
+# Why RQ
 
-RQ was selected for early-stage simplicity:
+RQ was chosen for its simplicity:
 
-- Minimal infrastructure complexity
 - Redis-based queueing
-- Easy integration with FastAPI
-- Stable synchronous worker model
-- Low cognitive overhead
+- minimal infrastructure overhead
+- straightforward integration with FastAPI
+- simple worker lifecycle
 
-This aligns with DocCore’s broader philosophy of:
-
-> Operational simplicity over distributed complexity
+This aligns with DocCore’s approach of keeping the system understandable and easy to operate.
 
 ---
 
-# Why Not Serverless Yet
+# Important Clarification on Chunking
 
-Serverless alternatives (QStash, Cloud Run, Lambda) were evaluated conceptually but not adopted at this stage.
+DocCore no longer uses naive chunking as the primary abstraction; it uses document blocks, with chunking as an internal fallback/splitting strategy.
 
-Reasons:
+This shift is important because:
 
-- Higher architectural complexity
-- More moving parts
-- Debugging overhead
-- Workflow fragmentation risk
-- Need for re-architecting ingestion pipeline
-
----
-
-# Cost Inefficiency Pattern
-
-The current system exhibits a common SaaS inefficiency pattern:
-
-```text
-Low ingestion volume
-    +
-Always-on worker
-    =
-High idle cost ratio
-```
-
-This is especially visible in:
-
-- Early-stage usage
-- Portfolio/demo environments
-- Low-traffic SaaS systems
+- it improves consistency in retrieval units
+- it decouples ingestion logic from simple text splitting
+- it aligns better with embedding structure
+- it reduces fragmentation issues in long documents
 
 ---
 
-# Observed Billing Behavior
+# Reliability Model
 
-Worker billing remains stable regardless of:
+The worker system includes basic reliability mechanisms:
 
-- Queue activity
-- Job volume
-- System idle state
+- RQ retry support
+- job re-execution on failure
+- error handling in pipeline steps
+- ingestion state tracking in database
 
-This results in:
-
-- Predictable monthly cost
-- But inefficient resource utilization
+It is reliable for ingestion workflows but is not a full workflow orchestration system.
 
 ---
 
-# Scaling Behavior
+# System Role Separation
 
-Current worker scaling model:
-
-- Fixed 1-instance worker
-- No auto-scaling
-- No scale-to-zero behavior
-- Manual deployment scaling only
+| Component | Responsibility |
+|----------|----------------|
+| API | request handling + enqueue jobs |
+| Worker | ingestion + indexing pipeline |
+| RAG runtime | query-time retrieval |
+| PostgreSQL + pgvector | storage + vector search |
 
 ---
 
 # Optimization Opportunities
 
-Several optimization paths exist:
+Several directions exist for improving cost efficiency and execution model:
 
 ---
 
-## 1. Burst Mode Execution (RQ)
+## Burst Execution
 
-Attempt to run worker in burst mode:
+Run worker only when queue has jobs.
 
-- Process queue then exit
-- Reduce idle runtime
-- Improve efficiency
-
-Limitations:
-
-- Platform still bills per uptime
-- Worker restarts required
-- Not true scale-to-zero
+- reduces idle cost
+- increases operational complexity
 
 ---
 
-## 2. Cron-Based Processing
+## Scheduled Processing
 
-Replace continuous worker with scheduled jobs:
+Batch ingestion using cron-style execution.
 
-- Periodic ingestion processing
-- Batch execution model
-- Reduced always-on cost
-
-Trade-off:
-
-- Higher latency
-- Less real-time behavior
+- simpler runtime cost
+- higher latency
 
 ---
 
-## 3. Event-Driven Serverless Workers
+## Serverless Workers
 
-Potential future migration:
+Event-driven execution model:
 
-- QStash (Upstash)
-- Cloud Run Jobs
-- AWS Lambda
+- Cloud Run
+- Lambda
+- QStash
 
-Benefits:
-
-- Scale-to-zero
-- Pay-per-execution
-- High cost efficiency
-
-Trade-offs:
-
-- Increased architectural complexity
-- Distributed debugging challenges
-- Pipeline redesign required
+- better elasticity
+- higher architectural complexity
 
 ---
 
-## 4. Hybrid Model
+## Hybrid Model
 
-Possible future architecture:
+Combination of:
 
-```text
-API → Queue → Serverless Worker → DB
-```
-
-or:
-
-```text
-API → Queue → Burst Worker (on-demand)
-```
+- lightweight always-on worker
+- burst/serverless ingestion for peaks
 
 ---
 
-# Worker as Bottleneck vs Utility
+# Key Insight
 
-The worker is not a performance bottleneck.
+The worker is best understood as:
 
-It is primarily:
+> a stable ingestion pipeline engine rather than an elastic compute system
 
-> a cost and architecture trade-off component
+It prioritizes:
 
-The system is currently optimized for simplicity, not maximum cost efficiency.
+- simplicity
+- reliability
+- predictable processing
 
----
+over:
 
-# Current Recommendation Status
-
-At this stage of the system:
-
-- Worker model is **functionally correct**
-- Worker model is **architecturally simple**
-- Worker model is **cost-inefficient at idle**
-
----
-
-# Strategic Insight
-
-The worker system reflects a broader engineering pattern:
-
-> Early-stage SaaS systems often trade infrastructure efficiency for simplicity and velocity.
-
-DocCore currently prioritizes:
-
-- Fast iteration
-- Stable ingestion pipeline
-- Minimal distributed complexity
-
-Over:
-
-- Perfect cost optimization
-- Fully serverless architecture
-- Complex event-driven systems
-
----
-
-# Future Direction
-
-Likely evolution path:
-
-1. Maintain RQ worker (current state)
-2. Introduce burst optimization
-3. Gradually evaluate serverless ingestion
-4. Potential migration to event-driven model
-5. Hybrid system depending on workload profile
+- cost optimization
+- dynamic scaling
+- serverless execution
 
 ---
 
 # Final Notes
 
-The worker system is a critical component of DocCore’s RAG pipeline but also one of the primary cost centers due to its always-on execution model.
+The worker is a core part of DocCore’s ingestion system and is essential for building the RAG index.
 
-The current architecture prioritizes reliability and simplicity, while leaving room for future optimization toward serverless and event-driven execution models.
+Its current design reflects a deliberate trade-off: keeping the system simple and reliable while accepting a non-optimal cost profile due to the always-on execution model.
