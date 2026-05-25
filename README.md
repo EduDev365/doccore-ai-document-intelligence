@@ -50,9 +50,10 @@ The system generates structured intelligence:
 - Insights
 - Context metadata
 
-![Summary](./media/screenshots/03-document-summary-generation-01.png)
-![Summary](./media/screenshots/03-document-summary-generation-02.png)
-
+<p align="center">
+  <img src="./media/screenshots/03-document-summary-generation-01.png" width="48%" />
+  <img src="./media/screenshots/03-document-summary-generation-02.png" width="48%" />
+</p>
 ---
 
 ### 4. Retrieval-Augmented Chat
