@@ -52,11 +52,11 @@ The system generates structured intelligence:
 
 #### Summary — Part 1
 
-![Summary 1](./media/screenshots/03-summary-01.png)
+![Summary 1](./media/screenshots/03-summary-1.png)
 
 #### Summary — Part 2
 
-![Summary 2](./media/screenshots/03-summary-02.png)
+![Summary 2](./media/screenshots/03-summary-2.png)
 
 ---
 
