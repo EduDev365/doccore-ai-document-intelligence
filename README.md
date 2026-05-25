@@ -50,7 +50,8 @@ The system generates structured intelligence:
 - Insights
 - Context metadata
 
-![Summary](./media/screenshots/03-document-summary-generation.png)
+![Summary](./media/screenshots/03-document-summary-generation-01.png)
+![Summary](./media/screenshots/03-document-summary-generation-02.png)
 
 ---
 
