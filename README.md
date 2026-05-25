@@ -50,11 +50,17 @@ The system generates structured intelligence:
 - Insights
 - Context metadata
 
-![Summary - Part 1](./media/screenshots/03-document-summary-generation-01.png)
-
-![Summary - Part 2](./media/screenshots/03-document-summary-generation-02.png)
 ---
 
+**Summary — Part 1**
+
+![Summary 1](./media/screenshots/03-document-summary-generation-01.png)
+
+---
+
+**Summary — Part 2**
+
+![Summary 2](./media/screenshots/03-document-summary-generation-02.png)
 ### 4. Retrieval-Augmented Chat
 
 Users interact with documents via:
