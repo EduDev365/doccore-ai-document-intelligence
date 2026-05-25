@@ -91,11 +91,11 @@ All operations are tracked using a credit-based billing system per tenant.
 
 **Billing example:**
 
-![Billing](./media/screenshots/07-credit-consumption.png)
+![Billing](./media/screenshots/07-credit-billing-example.png)
 
 **User usage dashboard:**
 
-![Usage](./media/screenshots/08-credit-usage-tracking.png)
+![Usage](./media/screenshots/08-user-credit-usage.png)
 
 ---
 
