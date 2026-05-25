@@ -1,568 +1,215 @@
-# DocCore — AI Document Intelligence Platform
+# DocCore — AI Document Intelligence System
 
-AI-powered document intelligence platform focused on Retrieval-Augmented Generation (RAG), semantic retrieval, document analysis, contextual chat, and multi-tenant SaaS architecture.
+DocCore is an AI-powered document intelligence platform that transforms unstructured documents into structured, searchable knowledge using Retrieval-Augmented Generation (RAG), scalable backend pipelines, and multi-tenant SaaS architecture.
 
----
-
-## Overview
-
-DocCore is a production-oriented AI document platform designed to process, index, retrieve, and analyze unstructured files using modern LLM and vector retrieval pipelines.
-
-The system was built around a document-centric AI architecture where uploaded files become searchable semantic knowledge bases through embeddings, retrieval pipelines, contextual prompting, and structured extraction workflows.
-
-Unlike simple chatbot wrappers, DocCore focuses heavily on:
-
-* Multi-tenant isolation
-* Secure document processing
-* Semantic retrieval
-* Context-aware RAG pipelines
-* Background processing
-* Credit-based SaaS architecture
-* Production backend patterns
-* Infrastructure cost optimization
-
-The platform is designed as both a SaaS product and an engineering case study around applied AI systems.
+It is designed as both a production-grade SaaS system and a system design case study for modern AI infrastructure.
 
 ---
 
-# Live Demo
+## What DocCore Does
 
-[https://doccore.com.br](https://doccore.com.br)
+DocCore converts raw documents into structured intelligence through an end-to-end AI pipeline:
 
----
-
-# Screenshots
-
-> Screenshots and architecture diagrams will be added in the `/media` folder.
-
-Planned showcase:
-
-* Dashboard
-* Upload flow
-* Retrieval chat
-* Processing pipeline
-* Multi-tenant workspace
-* Architecture diagrams
-* Embedding + retrieval flow
+- Document ingestion and processing
+- Semantic retrieval using embeddings
+- Context-aware RAG chat systems
+- AI-generated structured artifacts
+- Usage-based billing and tenant isolation
 
 ---
 
-# Core Features
+## Product Flow
 
-## AI Document Intelligence
+### 1. Document Upload
 
-* Retrieval-Augmented Generation (RAG)
-* Semantic document search
-* Contextual document chat
-* Embedding-based retrieval
-* AI artifact extraction
-* Structured document analysis
-* Long-context retrieval workflows
-* Multi-document contextual reasoning
+Users upload documents into isolated tenant workspaces.
+
+![Upload](./media/screenshots/02-document-ingestion.png)
 
 ---
 
-## Multi-Tenant SaaS Architecture
+### 2. Ingestion Pipeline
 
-DocCore was designed from the beginning as a multi-tenant platform.
+Documents are processed asynchronously:
 
-Key characteristics:
+- Extraction
+- Text normalization
+- Semantic blocking
+- Embedding generation
+- Vector indexing (pgvector)
 
-* Tenant-scoped document ownership
-* Tenant-isolated retrieval
-* Membership and permission systems
-* Per-tenant usage tracking
-* Tenant-aware billing and quotas
-* Isolated retrieval pipelines
-* Scoped vector search
-
-Isolation is enforced at both:
-
-* Application layer
-* Retrieval/query layer
-
-This prevents semantic leakage between organizations and ensures retrieval operations are always tenant-aware.
+![Processing](./media/screenshots/02-document-ingestion.png)
 
 ---
 
-## Retrieval-Augmented Generation (RAG)
+### 3. AI Understanding Layer
 
-The retrieval pipeline is one of the central architectural components of DocCore.
+The system generates structured intelligence:
 
-High-level flow:
+- Document summaries
+- Insights
+- Context metadata
 
-```text
-Document Upload
-    ↓
-Text Extraction
-    ↓
-Normalization
-    ↓
-Semantic Blocking
-    ↓
-Embeddings Generation
-    ↓
-pgvector Storage
-    ↓
-Top-K Semantic Retrieval
-    ↓
-Context Assembly
-    ↓
-LLM Response Generation
-```
-
-The platform avoids naive document processing strategies and instead focuses on retrieval quality and contextual consistency.
+![Summary](./media/screenshots/03-document-summary-generation.png)
 
 ---
 
-# Semantic Blocking Strategy
+### 4. Retrieval-Augmented Chat
 
-Instead of relying exclusively on fixed-size chunking, DocCore explores semantic blocking approaches.
+Users interact with documents via:
 
-The objective is improving:
+- Lightweight overview chat (fast responses)
+- Full RAG chat with thread-based memory
 
-* Retrieval precision
-* Context cohesion
-* Semantic continuity
-* Long-document understanding
-* Reduced context fragmentation
+**Overview Chat (fast mode):**
 
-Traditional chunking strategies often create:
+![Overview Chat](./media/screenshots/04-overview-chat.png)
 
-* Broken legal clauses
-* Incomplete sections
-* Context loss
-* Retrieval inconsistencies
+**Deep RAG Chat (full system):**
 
-Semantic blocking attempts to preserve logical structure and contextual continuity before embedding generation.
-
-This becomes especially important for:
-
-* Legal documents
-* Contracts
-* Structured reports
-* Technical documentation
-* Long-form textual analysis
+![RAG Chat](./media/screenshots/05-rag-thread-chat.png)
 
 ---
 
-# Semantic Retrieval
+### 5. Artifact Generation
 
-DocCore uses embedding-based semantic retrieval instead of keyword-only search.
+The system produces structured AI outputs that can be downloaded and reused.
 
-Key retrieval concepts:
-
-* Vector similarity search
-* Embedding indexing
-* Context ranking
-* Top-K retrieval
-* Similarity scoring
-* Retrieval filtering
-* Tenant-scoped search
-
-The retrieval layer uses Top-K semantic matching to retrieve the most relevant contextual blocks before assembling prompts for the language model.
-
-Current retrieval focus areas:
-
-* Better context ranking
-* Retrieval precision optimization
-* Hybrid retrieval experimentation
-* Context-window efficiency
-* Reduced hallucination risk
+![Artifact](./media/screenshots/06-artifact-generation.png)
 
 ---
 
-# pgvector + PostgreSQL
+### 6. Usage & Billing
 
-The vector layer is built on PostgreSQL with pgvector.
+All operations are tracked using a credit-based billing system per tenant.
 
-Reasons for this architectural choice:
+**Billing example:**
 
-* Operational simplicity
-* Unified relational + vector storage
-* Lower infrastructure complexity
-* Easier SaaS deployment
-* Cost efficiency
-* Good developer ergonomics
+![Billing](./media/screenshots/07-credit-consumption.png)
 
-Current database stack:
+**User usage dashboard:**
 
-* PostgreSQL
-* pgvector
-* SQLAlchemy
-* Alembic migrations
-* Multi-tenant relational modeling
-
-The infrastructure recently migrated from Render PostgreSQL to Neon for lower operational costs and simpler scaling.
+![Usage](./media/screenshots/08-credit-usage-tracking.png)
 
 ---
 
-# AI Chat Over Documents
+## Key Capabilities
 
-DocCore enables contextual conversations over uploaded files.
-
-Chat capabilities include:
-
-* Contextual question answering
-* Retrieval-grounded responses
-* Multi-block context assembly
-* Conversation continuity
-* Document-aware reasoning
-* Retrieval-constrained prompting
-
-The platform focuses on reducing hallucinations by grounding model responses in retrieved contextual data.
+- Retrieval-Augmented Generation (RAG)
+- Semantic search over document embeddings
+- Multi-tenant data isolation
+- Asynchronous document processing pipeline
+- AI-generated structured artifacts
+- Credit-based usage tracking
+- Context-aware conversational interfaces
 
 ---
 
-# Artifact Extraction
+## Architecture Overview
 
-Beyond conversational retrieval, the system also supports structured artifact generation workflows.
+DocCore is built around a retrieval-first AI architecture.
 
-Examples include:
+Core components:
 
-* Structured summaries
-* Key information extraction
-* Contextual outputs
-* AI-assisted document workflows
-* Structured response generation
-
-This enables workflows beyond simple chat interfaces.
+- FastAPI backend
+- Async worker-based ingestion (RQ + Redis)
+- PostgreSQL + pgvector for vector storage
+- Multi-tenant relational data model
+- Decoupled processing pipeline for scalability
 
 ---
 
-# Background Processing Architecture
-
-Document processing runs asynchronously through worker-based pipelines.
-
-Current workflow:
-
-```text
-Upload
-    ↓
-Queue
-    ↓
-Worker Processing
-    ↓
-Extraction
-    ↓
-Blocking
-    ↓
-Embeddings
-    ↓
-Vector Storage
-```
-
-Key goals:
-
-* Decoupled ingestion
-* Better reliability
-* Async processing
-* Scalable indexing
-* Reduced request latency
-
-Current infrastructure:
-
-* Redis queues
-* Background workers
-* Async document ingestion pipeline
-
-Future roadmap includes event-driven processing experimentation.
+## Engineering Deep Dive
 
 ---
 
-# Security Considerations
+### Retrieval Strategy
 
-Security and isolation are considered first-class architectural concerns.
+DocCore uses embedding-based semantic retrieval as its core intelligence layer.
 
-Current security-focused areas:
+Key concepts:
 
-* JWT authentication
-* HttpOnly cookies
-* Tenant-scoped access
-* Upload validation
-* Restricted file formats
-* Retrieval isolation
-* Permission validation
-* Environment secret isolation
-* Server-side validation
+- Vector similarity search
+- Top-K retrieval
+- Context ranking
+- Tenant-scoped filtering
+- Context assembly for LLM prompting
 
 ---
 
-# File Upload Restrictions
+### RAG Pipeline
 
-To reduce abuse and malicious uploads, document ingestion applies restrictions and validation rules.
-
-Examples include:
-
-* Allowed MIME type validation
-* Restricted file extensions
-* File size limits
-* Upload validation
-* Parsing restrictions
-* Sanitized processing flow
-
-The platform intentionally avoids unrestricted executable uploads.
-
-Accepted document categories are focused on structured textual analysis workflows.
+Document Upload → Extraction → Blocking → Embeddings → Vector Store → Retrieval → Context Assembly → LLM Response
 
 ---
 
-# Virus and Malicious Content Prevention
+### Multi-Tenant Architecture
 
-DocCore avoids unsafe upload behavior through controlled ingestion strategies.
+DocCore enforces strict tenant isolation at every layer:
 
-Current defensive approaches include:
-
-* Restricted upload formats
-* Non-executable document policy
-* Server-side validation
-* Controlled extraction pipelines
-* Limited parsing surface
-
-The architecture intentionally minimizes direct execution risks from uploaded content.
+- Document ownership scoped per tenant
+- Retrieval queries tenant-filtered
+- Embedding search isolated per workspace
+- Billing and usage tracked per tenant
 
 ---
 
-# Authentication and Access Control
+### Security Model
 
-Authentication is handled through JWT-based flows.
-
-Current approach includes:
-
-* JWT authentication
-* HttpOnly cookies
-* Tenant membership validation
-* Permission-aware endpoints
-* Session-aware APIs
-
-The authorization layer is integrated with the multi-tenant model.
+- JWT authentication with HttpOnly cookies
+- Tenant-scoped access control
+- File upload validation
+- Restricted document formats
+- Server-side permission enforcement
 
 ---
 
-# Billing Architecture
+### Usage & Billing
 
-The platform uses a credit-oriented billing strategy.
+Credit-based system:
 
-Core concepts:
-
-* Usage tracking
-* Processing credits
-* Production credits
-* Subscription periods
-* Usage ledger
-* Tenant-level quotas
-
-This architecture allows flexible resource accounting for:
-
-* Processing pipelines
-* Retrieval workloads
-* AI generation workflows
+- Credits consumed per processing operation
+- Separate tracking for ingestion and production usage
+- Tenant-level usage ledger
+- Subscription-based quotas
 
 ---
 
-# Backend Architecture
+### Engineering Decisions
 
-The backend follows layered architectural principles.
+**PostgreSQL + pgvector**
+- unified relational + vector storage
+- simpler infrastructure
 
-Current structure includes:
+**RQ Workers**
+- async ingestion pipeline
+- decoupled processing
 
-```text
-application/
-core/
-domain/
-infrastructure/
-interfaces/
-shared/
-workers/
-```
-
-Goals:
-
-* Separation of concerns
-* Infrastructure abstraction
-* Easier maintainability
-* Modular AI workflows
-* Scalable SaaS architecture
+**Sync backend design**
+- simpler operational model
+- stable worker integration
 
 ---
 
-# Technology Stack
+## Limitations
 
-## Backend
-
-* FastAPI
-* SQLAlchemy
-* Alembic
-* PostgreSQL
-* pgvector
-* Redis
-* RQ Workers
+- Retrieval ranking still evolving
+- Hybrid retrieval not fully implemented
+- Embedding strategy experimentation ongoing
+- Worker orchestration could evolve to event-driven design
 
 ---
 
-## Frontend
+## Future Improvements
 
-* Next.js
-* App Router
-* TailwindCSS
-* React
-
----
-
-## Infrastructure
-
-* Render
-* Neon
-* Vercel
-* Redis
-* Docker Compose
+- Hybrid retrieval (keyword + vector)
+- Advanced reranking models
+- Event-driven ingestion pipeline
+- Enhanced observability
+- Better long-context handling
 
 ---
 
-# Engineering Decisions
+## Status
 
-## Why PostgreSQL + pgvector?
-
-Instead of adopting a fully separate vector database early, DocCore uses PostgreSQL + pgvector to:
-
-* Reduce operational complexity
-* Keep relational and vector data unified
-* Simplify deployments
-* Reduce infrastructure costs
-* Accelerate iteration speed
-
----
-
-## Why Sync SQLAlchemy?
-
-The backend currently uses synchronous SQLAlchemy patterns.
-
-Reasons include:
-
-* Simpler operational behavior
-* Easier worker integration
-* Lower concurrency complexity
-* Stable development ergonomics
-* Better fit for current workload profile
-
-The current bottlenecks are retrieval and processing workloads rather than extreme concurrent API traffic.
-
----
-
-## Why Background Workers?
-
-Embedding generation and retrieval preparation are computationally heavier operations.
-
-Using worker pipelines allows:
-
-* Async ingestion
-* Reduced API latency
-* Better processing separation
-* Retry strategies
-* Decoupled document indexing
-
----
-
-## Why Multi-Tenant Isolation Matters
-
-AI document systems handling organizational data must avoid contextual leakage.
-
-DocCore treats tenant isolation as a core architectural requirement instead of an afterthought.
-
-Retrieval queries, memberships, document ownership, and contextual assembly are tenant-aware.
-
----
-
-# Current Limitations
-
-As an evolving platform, several areas are still under active iteration.
-
-Current limitations and experimentation areas:
-
-* Retrieval precision improvements
-* Better ranking strategies
-* Advanced hybrid retrieval
-* Event-driven workers
-* Retrieval latency optimization
-* Embedding strategy experimentation
-* Long-context optimization
-
----
-
-# Future Roadmap
-
-Planned exploration areas:
-
-* Event-driven processing pipelines
-* Hybrid retrieval systems
-* Better ranking and reranking
-* Advanced artifact generation
-* Improved semantic segmentation
-* Enhanced observability
-* More advanced tenant analytics
-* Workflow automation
-
----
-
-# Architecture Diagram
-
-```text
-                ┌────────────────────┐
-                │ Next.js Frontend   │
-                │      (Vercel)      │
-                └─────────┬──────────┘
-                          │
-                          ▼
-                ┌────────────────────┐
-                │ FastAPI Backend    │
-                │      (Render)      │
-                └─────────┬──────────┘
-                          │
-         ┌────────────────┴──────────────┐
-         │                               │
-         ▼                               ▼
-┌──────────────────┐          ┌──────────────────┐
-│ Redis Queue      │          │ Neon PostgreSQL  │
-│ + RQ Workers     │          │ + pgvector       │
-└────────┬─────────┘          └────────┬─────────┘
-         │                              │
-         ▼                              ▼
-┌──────────────────┐          ┌──────────────────┐
-│ Embeddings       │          │ Semantic Search  │
-│ Processing        │          │ Retrieval        │
-└──────────────────┘          └──────────────────┘
-```
-
----
-
-# Repository Structure
-
-This public repository intentionally focuses on:
-
-* Architecture
-* Engineering decisions
-* System design
-* Showcase material
-* Screenshots and demonstrations
-
-The production SaaS codebase remains private.
-
----
-
-# Project Goals
-
-The primary engineering goals behind DocCore include:
-
-* Building production-oriented AI systems
-* Exploring real-world RAG architectures
-* Understanding retrieval quality trade-offs
-* Designing scalable document pipelines
-* Combining SaaS architecture with applied AI workflows
-
----
-
-# Status
-
-Active development and experimentation.
-
-The platform continues evolving around retrieval quality, document intelligence workflows, infrastructure simplification, and production-oriented AI engineering.
+Active development — evolving into production-grade AI SaaS architecture.
