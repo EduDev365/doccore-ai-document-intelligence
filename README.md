@@ -22,6 +22,19 @@ The platform is designed both as a real-world SaaS architecture and as a system 
 
 ---
 
+
+# Product Demo
+
+Video walkthrough showcasing the complete document intelligence workflow, including ingestion, AI processing, semantic retrieval, contextual conversations, artifact generation, and billing operations.
+
+▶️ **Watch Demo**
+
+[demo-doccore-ingestion-chat-pipeline.mp4](./media/videos/demo-doccore-ingestion-chat-pipeline.mp4)
+
+---
+
+# Core Capabilities
+
 # Core Capabilities
 
 * Retrieval-Augmented Generation (RAG)
